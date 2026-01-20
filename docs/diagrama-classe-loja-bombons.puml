@@ -1,0 +1,94 @@
+@startuml Sistema de Controle de Vendas - Loja de Bombons
+
+' =========================
+' ENTIDADES (DOMAIN)
+' =========================
+
+class Produto {
+  - id: number
+  - nome: string
+  - preco: number
+  + getId(): number
+  + getNome(): string
+  + getPreco(): number
+}
+
+class ItemVenda {
+  - produto: Produto
+  - quantidade: number
+  + calcularSubtotal(): number
+  + getProduto(): Produto
+  + getQuantidade(): number
+}
+
+class Venda {
+  - id: number
+  - itens: ItemVenda[]
+  + adicionarItem(produto: Produto, quantidade: number): void
+  + calcularTotal(): number
+  + getId(): number
+  + getItens(): ItemVenda[]
+}
+
+' =========================
+' REPOSITÓRIOS (INTERFACES)
+' =========================
+
+interface ProdutoRepository {
+  + salvar(produto: Produto): void
+  + listar(): Produto[]
+}
+
+interface VendaRepository {
+  + salvar(venda: Venda): void
+  + listar(): Venda[]
+}
+
+' =========================
+' IMPLEMENTAÇÕES (INFRA)
+' =========================
+
+class ProdutoRepositoryEmMemoria {
+  - produtos: Produto[]
+  + salvar(produto: Produto): void
+  + listar(): Produto[]
+}
+
+class VendaRepositoryEmMemoria {
+  - vendas: Venda[]
+  + salvar(venda: Venda): void
+  + listar(): Venda[]
+}
+
+' =========================
+' SERVICES (APPLICATION)
+' =========================
+
+class ProdutoService {
+  - produtoRepository: ProdutoRepository
+  + cadastrarProduto(id: number, nome: string, preco: number): void
+  + listarProdutos(): Produto[]
+}
+
+class VendaService {
+  - vendaRepository: VendaRepository
+  - produtoRepository: ProdutoRepository
+  + criarVenda(id: number): Venda
+  + listarVendas(): Venda[]
+}
+
+' =========================
+' RELACIONAMENTOS
+' =========================
+
+Venda "1" *-- "0..*" ItemVenda : contém
+ItemVenda "1" --> "1" Produto : refere-se
+
+ProdutoRepository <|.. ProdutoRepositoryEmMemoria
+VendaRepository <|.. VendaRepositoryEmMemoria
+
+ProdutoService --> ProdutoRepository
+VendaService --> VendaRepository
+VendaService --> ProdutoRepository
+
+@enduml
